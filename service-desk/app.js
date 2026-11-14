@@ -36,6 +36,8 @@ const seedTickets = [
   }
 ];
 
+let storageWarning = "";
+let storageNeedsRestore = false;
 let tickets = loadTickets();
 let selectedTicketId = tickets[0]?.id ?? null;
 
@@ -86,9 +88,10 @@ ticketForm.addEventListener("submit", (event) => {
     ]
   };
 
-  tickets.unshift(formTicket);
+  const nextTickets = [formTicket, ...tickets];
+  if (!saveTickets(nextTickets)) return;
+  tickets = nextTickets;
   selectedTicketId = formTicket.id;
-  saveTickets();
   ticketForm.reset();
   showToast(`Chamado #${formTicket.id} aberto com sucesso.`);
   render();
@@ -97,30 +100,60 @@ ticketForm.addEventListener("submit", (event) => {
 searchInput.addEventListener("input", renderTicketList);
 
 clearData.addEventListener("click", () => {
-  localStorage.removeItem(STORAGE_KEY);
-  tickets = JSON.parse(JSON.stringify(seedTickets));
+  const restoredTickets = JSON.parse(JSON.stringify(seedTickets));
+  if (!saveTickets(restoredTickets, true)) return;
+  tickets = restoredTickets;
   selectedTicketId = tickets[0].id;
-  saveTickets();
   showToast("Base local restaurada.");
   render();
 });
 
 function loadTickets() {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seedTickets));
-    return JSON.parse(JSON.stringify(seedTickets));
-  }
-
   try {
-    return JSON.parse(stored);
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === null) return JSON.parse(JSON.stringify(seedTickets));
+    const parsed = JSON.parse(stored);
+    const ids = new Set();
+    if (!Array.isArray(parsed) || !parsed.every((ticket) => {
+      if (!ticket || !Number.isSafeInteger(ticket.id) || ticket.id < 1 || ids.has(ticket.id)) return false;
+      ids.add(ticket.id);
+      return ["requester", "email", "category", "title", "description", "correction"].every((key) => typeof ticket[key] === "string") &&
+        ["Aberto", "Em atendimento", "Aguardando usuário", "Resolvido"].includes(ticket.status) &&
+        ["Baixa", "Média", "Alta", "Crítica"].includes(ticket.priority) &&
+        [ticket.createdAt, ticket.updatedAt].every((date) => typeof date === "string" && Number.isFinite(Date.parse(date))) &&
+        Array.isArray(ticket.events) && ticket.events.every((event) => typeof event === "string");
+    })) throw new Error("Base inválida");
+    return parsed;
   } catch {
-    return JSON.parse(JSON.stringify(seedTickets));
+    storageNeedsRestore = true;
+    storageWarning = "Não foi possível carregar os chamados locais. Os dados existentes foram preservados. Verifique o armazenamento e faça uma cópia antes de restaurar a base pelo Histórico.";
+    return [];
   }
 }
 
-function saveTickets() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
+function saveTickets(nextTickets = tickets, restoring = false) {
+  if (storageNeedsRestore && !restoring) {
+    showToast("Armazenamento indisponível ou inválido. Consulte o aviso antes de restaurar a base.");
+    return false;
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextTickets));
+    storageNeedsRestore = false;
+    storageWarning = "";
+    renderStorageWarning();
+    return true;
+  } catch {
+    storageWarning = "Não foi possível salvar os chamados. A alteração não foi aplicada. Verifique o espaço e as permissões do navegador e tente novamente.";
+    renderStorageWarning();
+    showToast("Falha ao salvar. Seus campos foram preservados para nova tentativa.");
+    return false;
+  }
+}
+
+function renderStorageWarning() {
+  const warning = document.querySelector("#storageWarning");
+  warning.textContent = storageWarning;
+  warning.hidden = !storageWarning;
 }
 
 function nextId() {
@@ -128,6 +161,7 @@ function nextId() {
 }
 
 function render() {
+  renderStorageWarning();
   renderTicketList();
   renderTicketDetails();
   renderHistory();
@@ -261,12 +295,13 @@ function updateSelectedTicket(ticketId) {
     eventList.push(`Correção registrada: ${newCorrection}`);
   }
 
-  ticket.status = newStatus;
-  ticket.priority = newPriority;
-  ticket.correction = newCorrection;
-  ticket.updatedAt = new Date().toISOString();
-  ticket.events = ticket.events.concat(eventList);
-  saveTickets();
+  const updatedTicket = {
+    ...ticket, status: newStatus, priority: newPriority, correction: newCorrection,
+    updatedAt: new Date().toISOString(), events: ticket.events.concat(eventList)
+  };
+  const nextTickets = tickets.map((item) => item.id === ticketId ? updatedTicket : item);
+  if (!saveTickets(nextTickets)) return;
+  tickets = nextTickets;
 
   showToast(`Chamado #${ticket.id} atualizado.`);
   render();
