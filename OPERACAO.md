@@ -24,6 +24,8 @@ O CI executa em pushes para `feature/**`, `bugfix/**`, `staging` e `main`, e em 
 
 ## Fluxo de revisão
 
+Nesta entrega, o PR [#1](https://github.com/milhomemwilker/wilker-milhomem-ia-dev-chatgpt/pull/1) integrou a feature na `staging` após aprovação do CI. A promoção para `main` foi aberta no PR [#2](https://github.com/milhomemwilker/wilker-milhomem-ia-dev-chatgpt/pull/2). A execução [43617490800](https://github.com/milhomemwilker/wilker-milhomem-ia-dev-chatgpt/actions/runs/43617490800) comprova o sucesso do job `quality` na feature. O estado final dos PRs e seus checks pode ser consultado nesses links.
+
 1. Criar `feature/<descricao>` ou `bugfix/<descricao>` a partir da `staging` atualizada.
 2. Implementar e testar. Usar commits `feature:` ou `bugfix:`.
 3. Publicar a branch e abrir PR para `staging`; revisar o diff e os resultados de CI.
@@ -47,6 +49,12 @@ gh api --method PUT repos/milhomemwilker/wilker-milhomem-ia-dev-chatgpt/branches
 ```
 
 O modelo exige PR com uma aprovação, resolução de conversas, branch atualizada e check `quality`; aplica-se a administradores e proíbe force push e exclusão. Não ative antes de haver outro colaborador para revisar, para não bloquear o trabalho individual. Se houver regras existentes, combine os requisitos antes de aplicar. Confirme o resultado por nova consulta e em Settings → Branches.
+
+## Git no Windows: Staging e staging
+
+O remoto conserva duas branches que diferem apenas por maiúscula: `Staging` e `staging`. Isso causou falha no fetch com o backend `files` em um sistema de arquivos sem distinção de caixa. Foi adicionada a exclusão local `^refs/heads/Staging` ao refspec `remote.origin.fetch`; a referência de acompanhamento conflitante foi removida localmente com `git update-ref -d refs/remotes/origin/Staging`, e o fetch recriou `origin/staging` corretamente. Nenhuma branch remota foi excluída, e a branch local `staging-anterior` foi preservada.
+
+Para outro clone Windows com o mesmo problema, primeiro confira suas referências e a configuração existente. O refspec negativo pode ser adicionado com `git config --add remote.origin.fetch "^refs/heads/Staging"`. Essa configuração é local ao clone e não é transmitida no push. A equipe deve evitar criar novas branches que diferem apenas por maiúsculas.
 
 ## Hospedagem preparada — não ativada
 
