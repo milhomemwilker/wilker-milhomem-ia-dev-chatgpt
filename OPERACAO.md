@@ -2,6 +2,8 @@
 
 ## Situação
 
+Validação local desta entrega: onze testes de regras aprovados; três fluxos de navegador na aplicação e quatro no artefato com homologação, incluindo separação dos dados. O quarto teste só se aplica ao artefato com `/staging/` e é ignorado na execução direta da aplicação. Imagens desktop e móvel foram inspecionadas. PR de entrada na homologação: [#1](https://github.com/milhomemwilker/wilker-milhomem-ia-dev-chatgpt/pull/1).
+
 CI e testes de navegador foram adicionados. Hospedagem permanece pendente por escolha do usuário. A regra de proteção da `main` está preparada, mas não aplicada: o GitHub CLI está sem autenticação administrativa. Arquivos de configuração não comprovam ativação de recursos remotos.
 
 ## Executar localmente

@@ -1,5 +1,9 @@
 # Correção do incidente
 
+## Atualização de homologação e automação
+
+Os registros abaixo descrevem a fase inicial. A entrega posterior adicionou testes reais em Chromium, CI, template de PR, configuração preparada para proteção da `main` e publicação manual desativada. Consulte [OPERACAO.md](../OPERACAO.md) e [DETALHAMENTO.md](../DETALHAMENTO.md) para o estado atual e as pendências administrativas. A hospedagem permanece pendente por escolha do usuário.
+
 ## Diagnóstico e validação
 
 - Abertura: `Math.max` sobre uma lista vazia retornava `-Infinity`. A geração de IDs agora começa em 1001 mesmo com armazenamento contendo `[]`.
