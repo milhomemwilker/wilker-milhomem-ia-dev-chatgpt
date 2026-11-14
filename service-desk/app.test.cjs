@@ -8,6 +8,7 @@ function app(stored = '[]', options = {}) {
   const elements = new Map();
   const storage = new Map([['serviceDeskTickets', stored]]);
   const context = vm.createContext({
+    window: { confirm: () => options.confirmRestore ?? true },
     document: {
       querySelectorAll: () => [],
       querySelector(selector) {
@@ -34,6 +35,23 @@ test('abertura com base vazia gera ID finito e sequencial', () => {
   assert.equal(vm.runInContext('nextId()', context), 1001);
   vm.runInContext('tickets.push({ id: 1001 })', context);
   assert.equal(vm.runInContext('nextId()', context), 1002);
+});
+
+test('cancelar restauração preserva memória e armazenamento', () => {
+  const { context, elements, storage } = app(null, { confirmRestore: false });
+  vm.runInContext('tickets[0].title = "Meu chamado"; saveTickets()', context);
+  const before = storage.get('serviceDeskTickets');
+  elements.get('#clearData').listeners.click();
+  assert.equal(vm.runInContext('tickets[0].title', context), 'Meu chamado');
+  assert.equal(storage.get('serviceDeskTickets'), before);
+});
+
+test('confirmar restauração substitui base inválida somente após autorização', () => {
+  const { context, elements, storage } = app('{', { confirmRestore: true });
+  elements.get('#clearData').listeners.click();
+  assert.equal(vm.runInContext('tickets.length', context), 2);
+  assert.equal(JSON.parse(storage.get('serviceDeskTickets')).length, 2);
+  assert.equal(elements.get('#storageWarning').hidden, true);
 });
 
 test('dados corrompidos ou incompatíveis são preservados sem quebrar a tela', () => {
