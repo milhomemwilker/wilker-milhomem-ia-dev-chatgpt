@@ -100,6 +100,7 @@ ticketForm.addEventListener("submit", (event) => {
 searchInput.addEventListener("input", renderTicketList);
 
 clearData.addEventListener("click", () => {
+  if (!window.confirm("Restaurar a base local? Todos os chamados deste navegador serão substituídos pelos exemplos. Esta ação não pode ser desfeita. Faça uma cópia dos dados antes de continuar.")) return;
   const restoredTickets = JSON.parse(JSON.stringify(seedTickets));
   if (!saveTickets(restoredTickets, true)) return;
   tickets = restoredTickets;
