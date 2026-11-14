@@ -63,6 +63,12 @@ tabs.forEach((tab) => {
 ticketForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
+  const requiredTextFields = ["#requester", "#title", "#description"];
+  if (requiredTextFields.some((selector) => !document.querySelector(selector).value.trim())) {
+    showToast("Preencha nome, título e descrição com texto válido.");
+    return;
+  }
+
   const formTicket = {
     id: nextId(),
     requester: document.querySelector("#requester").value.trim(),
@@ -92,7 +98,7 @@ searchInput.addEventListener("input", renderTicketList);
 
 clearData.addEventListener("click", () => {
   localStorage.removeItem(STORAGE_KEY);
-  tickets = [...seedTickets];
+  tickets = JSON.parse(JSON.stringify(seedTickets));
   selectedTicketId = tickets[0].id;
   saveTickets();
   showToast("Base local restaurada.");
@@ -103,13 +109,13 @@ function loadTickets() {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(seedTickets));
-    return [...seedTickets];
+    return JSON.parse(JSON.stringify(seedTickets));
   }
 
   try {
     return JSON.parse(stored);
   } catch {
-    return [...seedTickets];
+    return JSON.parse(JSON.stringify(seedTickets));
   }
 }
 
@@ -118,7 +124,7 @@ function saveTickets() {
 }
 
 function nextId() {
-  return Math.max(...tickets.map((ticket) => ticket.id)) + 1;
+  return Math.max(1000, ...tickets.map((ticket) => ticket.id)) + 1;
 }
 
 function render() {
@@ -132,7 +138,8 @@ function renderTicketList() {
   const filteredTickets = tickets.filter((ticket) => {
     return (
       String(ticket.id).includes(term) ||
-      ticket.title.toLowerCase().includes(term)
+      ticket.title.toLowerCase().includes(term) ||
+      ticket.requester.toLowerCase().includes(term)
     );
   });
 
@@ -259,6 +266,7 @@ function updateSelectedTicket(ticketId) {
   ticket.correction = newCorrection;
   ticket.updatedAt = new Date().toISOString();
   ticket.events = ticket.events.concat(eventList);
+  saveTickets();
 
   showToast(`Chamado #${ticket.id} atualizado.`);
   render();
