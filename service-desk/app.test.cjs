@@ -68,3 +68,11 @@ test('fechamento persiste status, correção e histórico após recarregar', () 
 });
 
 
+test('busca encontra chamado pelo solicitante', () => {
+  const { context, elements } = app(null);
+  elements.get('#searchInput').value = 'marina';
+  vm.runInContext('renderTicketList()', context);
+  assert.equal(elements.get('#ticketCounter').textContent, '1 chamado');
+  assert.match(elements.get('#ticketList').innerHTML, /Marina Costa/);
+});
+
