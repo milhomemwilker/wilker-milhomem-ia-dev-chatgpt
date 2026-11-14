@@ -92,7 +92,7 @@ searchInput.addEventListener("input", renderTicketList);
 
 clearData.addEventListener("click", () => {
   localStorage.removeItem(STORAGE_KEY);
-  tickets = [...seedTickets];
+  tickets = JSON.parse(JSON.stringify(seedTickets));
   selectedTicketId = tickets[0].id;
   saveTickets();
   showToast("Base local restaurada.");
@@ -103,13 +103,13 @@ function loadTickets() {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(seedTickets));
-    return [...seedTickets];
+    return JSON.parse(JSON.stringify(seedTickets));
   }
 
   try {
     return JSON.parse(stored);
   } catch {
-    return [...seedTickets];
+    return JSON.parse(JSON.stringify(seedTickets));
   }
 }
 

@@ -76,3 +76,11 @@ test('busca encontra chamado pelo solicitante', () => {
   assert.match(elements.get('#ticketList').innerHTML, /Marina Costa/);
 });
 
+test('restaurar base recupera dados originais após edição', () => {
+  const { context, elements } = app(null);
+  vm.runInContext('tickets[0].status = "Resolvido"; tickets[0].events.push("Editado")', context);
+  elements.get('#clearData').listeners.click();
+  assert.equal(vm.runInContext('tickets[0].status', context), 'Aberto');
+  assert.equal(vm.runInContext('tickets[0].events.length', context), 1);
+});
+
