@@ -1,0 +1,13 @@
+{
+  "name": "service-desk-academico",
+  "private": true,
+  "scripts": {
+    "test": "node --test service-desk/app.test.cjs",
+    "check": "node --check service-desk/app.js",
+    "test:e2e": "playwright test",
+    "build:pages": "node scripts/build-pages.cjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1"
+  }
+}

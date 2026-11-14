@@ -1,5 +1,22 @@
 # Detalhamento técnico — Service Desk
 
+## Atualização: CI, homologação no navegador e operação
+
+Na branch `feature/ci-homologacao-deploy`, foram adicionados:
+
+- `package.json` e lockfile com Playwright como dependência de desenvolvimento; a aplicação permanece estática e sem dependências em execução.
+- Testes em navegador Chromium isolado para abertura, busca, resolução, persistência, histórico, cancelamento e confirmação nativa da restauração e formulário móvel de 390 × 844 pixels. A imagem móvel foi inspecionada e não apresentou transbordamento horizontal.
+- Workflow `CI`, com check `quality`, para sintaxe, onze testes de regras e homologação no navegador em pushes e PRs. Relatórios e traces são guardados como artefatos.
+- Template de PR, modelo de proteção da `main` e guia [OPERACAO.md](OPERACAO.md), incluindo ativação, homologação, publicação e rollback por novo commit.
+- Empacotamento público por lista explícita de arquivos, com produção na raiz e homologação em `/staging/`, identificada e com chave de armazenamento distinta. Os ambientes compartilham origem; essa separação não é uma barreira de segurança.
+- Workflow manual de Pages, desativado por padrão e condicionado à variável `ENABLE_PAGES=true`. Não há publicação automática nem hospedagem ativa comprovada nesta etapa.
+
+O Chrome instalado falhou na criação de abas antes de executar a aplicação; o Chromium oficial do Playwright foi instalado e os fluxos foram executados com sucesso. Também foi testado o artefato estático de homologação. Os dados utilizados são fictícios e os contextos não utilizam o perfil pessoal do navegador.
+
+O usuário escolheu preparar os arquivos e manter a hospedagem pendente. A proteção da `main` também não foi ativada, pois o CLI não está autenticado. A revisão automática rejeitou reutilizar a credencial do Git na API por risco de acesso a credenciais; esse método foi abandonado. Não foram gravados tokens no projeto. A revisão desta entrega é técnica, pelo agente, sem aprovação independente de outro colaborador.
+
+As afirmações anteriores de que a validação visual estava pendente referem-se às entregas anteriores. Os novos testes de navegador cobrem os fluxos descritos acima; não representam uma auditoria completa de acessibilidade ou testes em todos os navegadores.
+
 ## Atualização: proteção do armazenamento e restauração
 
 Foram implementadas duas melhorias em branches próprias:

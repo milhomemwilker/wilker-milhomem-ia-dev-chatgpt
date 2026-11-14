@@ -37,3 +37,5 @@ O aplicativo informa falhas de armazenamento e preserva os dados anteriores quan
 Consulte [VERSIONAMENTO.md](VERSIONAMENTO.md) para diagnóstico, commits atômicos, homologação, deploy e rollback.
 
 Execute os testes com: node --test service-desk/app.test.cjs
+
+Para testes reais no navegador e instruções de CI, proteção de branches e publicação, consulte [OPERACAO.md](../OPERACAO.md). A aplicação continua funcionando sem instalação; Playwright e npm são necessários apenas para desenvolvimento e testes.
