@@ -1,0 +1,56 @@
+name: Publicar demonstracao
+# Publicação manual, desativada até configuração explícita de Pages e da variável.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main' && vars.ENABLE_PAGES == 'true'
+    permissions:
+      contents: read
+      pages: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+        with:
+          ref: staging
+          path: staging-source
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run check && npm test
+      - run: node --check staging-source/service-desk/app.js && node --test staging-source/service-desk/app.test.cjs
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/build-pages.cjs staging-source
+      - run: npm run test:e2e
+        env:
+          TEST_SITE_ROOT: dist
+      - run: npm run test:e2e
+        env:
+          TEST_SITE_ROOT: dist
+          TEST_BASE_PATH: /staging/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
