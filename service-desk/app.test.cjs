@@ -49,3 +49,22 @@ test('abertura válida persiste e exibe chamado no histórico', () => {
   assert.match(elements.get('#historyTable').innerHTML, /Falha no acesso/);
   assert.equal(vm.runInContext('tickets.length', app(JSON.stringify(saved)).context), 1);
 });
+test('fechamento persiste status, correção e histórico após recarregar', () => {
+  const ticket = {
+    id: 1001, requester: 'Ana', email: 'ana@example.com', category: 'Software',
+    title: 'Falha', description: 'Erro', priority: 'Alta', status: 'Aberto',
+    correction: '', createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(), events: []
+  };
+  const { context, elements, storage } = app(JSON.stringify([ticket]));
+  context.document.querySelector('#detailStatus').value = 'Resolvido';
+  context.document.querySelector('#detailPriority').value = 'Alta';
+  context.document.querySelector('#detailCorrection').value = 'Correção aplicada';
+  vm.runInContext('updateSelectedTicket(1001)', context);
+  const reloaded = app(storage.get('serviceDeskTickets'));
+  assert.equal(vm.runInContext('tickets[0].status', reloaded.context), 'Resolvido');
+  assert.equal(vm.runInContext('tickets[0].correction', reloaded.context), 'Correção aplicada');
+  assert.equal(vm.runInContext('tickets[0].events.length', reloaded.context), 2);
+});
+
+
