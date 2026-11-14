@@ -4,10 +4,11 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 // DOM mínimo para exercitar as regras reais do app sem dependências externas.
-function app(stored = '[]') {
+function app(stored = '[]', options = {}) {
   const elements = new Map();
   const storage = new Map([['serviceDeskTickets', stored]]);
   const context = vm.createContext({
+    window: { confirm: () => options.confirmRestore ?? true },
     document: {
       querySelectorAll: () => [],
       querySelector(selector) {
@@ -19,8 +20,8 @@ function app(stored = '[]') {
       }
     },
     localStorage: {
-      getItem: key => storage.get(key) ?? null,
-      setItem: (key, value) => storage.set(key, value),
+      getItem: key => { if (options.readFails) throw Error('blocked'); return storage.get(key) ?? null; },
+      setItem: (key, value) => { if (options.writeFails) throw Error('quota'); storage.set(key, value); },
       removeItem: key => storage.delete(key)
     },
     setTimeout() {}
@@ -34,6 +35,63 @@ test('abertura com base vazia gera ID finito e sequencial', () => {
   assert.equal(vm.runInContext('nextId()', context), 1001);
   vm.runInContext('tickets.push({ id: 1001 })', context);
   assert.equal(vm.runInContext('nextId()', context), 1002);
+});
+
+test('cancelar restauração preserva memória e armazenamento', () => {
+  const { context, elements, storage } = app(null, { confirmRestore: false });
+  vm.runInContext('tickets[0].title = "Meu chamado"; saveTickets()', context);
+  const before = storage.get('serviceDeskTickets');
+  elements.get('#clearData').listeners.click();
+  assert.equal(vm.runInContext('tickets[0].title', context), 'Meu chamado');
+  assert.equal(storage.get('serviceDeskTickets'), before);
+});
+
+test('confirmar restauração substitui base inválida somente após autorização', () => {
+  const { context, elements, storage } = app('{', { confirmRestore: true });
+  elements.get('#clearData').listeners.click();
+  assert.equal(vm.runInContext('tickets.length', context), 2);
+  assert.equal(JSON.parse(storage.get('serviceDeskTickets')).length, 2);
+  assert.equal(elements.get('#storageWarning').hidden, true);
+});
+
+test('dados corrompidos ou incompatíveis são preservados sem quebrar a tela', () => {
+  for (const raw of ['{', 'null', '{}', '[{}]', '[{"id":1}]']) {
+    const { context, elements, storage } = app(raw);
+    assert.equal(vm.runInContext('tickets.length', context), 0);
+    assert.equal(vm.runInContext('saveTickets([])', context), false);
+    assert.equal(storage.get('serviceDeskTickets'), raw);
+    assert.equal(elements.get('#storageWarning').hidden, false);
+  }
+});
+
+test('bloqueio de leitura não impede inicialização', () => {
+  const { elements, storage } = app('[]', { readFails: true });
+  assert.equal(elements.get('#storageWarning').hidden, false);
+  assert.equal(storage.get('serviceDeskTickets'), '[]');
+});
+
+test('falha de escrita preserva abertura, edição e restauração', () => {
+  const options = { writeFails: true };
+  const { context, elements, storage } = app(null, options);
+  for (const [selector, value] of Object.entries({
+    '#requester': 'Ana', '#email': 'ana@example.com', '#category': 'Software',
+    '#priority': 'Alta', '#title': 'Falha', '#description': 'Erro'
+  })) context.document.querySelector(selector).value = value;
+  elements.get('#ticketForm').listeners.submit({ preventDefault() {} });
+  assert.equal(vm.runInContext('tickets.length', context), 2);
+  assert.equal(elements.get('#title').value, 'Falha');
+  context.document.querySelector('#detailStatus').value = 'Resolvido';
+  context.document.querySelector('#detailPriority').value = 'Alta';
+  context.document.querySelector('#detailCorrection').value = 'Solução';
+  vm.runInContext('updateSelectedTicket(1001)', context);
+  assert.equal(vm.runInContext('tickets[0].status', context), 'Aberto');
+  vm.runInContext('tickets[0].title = "Preservar"', context);
+  elements.get('#clearData').listeners.click();
+  assert.equal(vm.runInContext('tickets[0].title', context), 'Preservar');
+  assert.equal(storage.get('serviceDeskTickets'), null);
+  options.writeFails = false;
+  assert.equal(vm.runInContext('saveTickets()', context), true);
+  assert.equal(elements.get('#storageWarning').hidden, true);
 });
 
 test('abertura válida persiste e exibe chamado no histórico', () => {

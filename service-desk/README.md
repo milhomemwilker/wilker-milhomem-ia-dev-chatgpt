@@ -32,6 +32,8 @@ Também é possível abrir diretamente o arquivo `index.html` com dois cliques.
 
 ## Versionamento e testes
 
+O aplicativo informa falhas de armazenamento e preserva os dados anteriores quando uma gravação falha. Dados locais inválidos não são sobrescritos automaticamente. No Histórico, **Restaurar base de exemplo** pede confirmação antes de substituir os chamados; faça uma cópia dos dados antes de confirmar. Cancelar mantém a base atual.
+
 Consulte [VERSIONAMENTO.md](VERSIONAMENTO.md) para diagnóstico, commits atômicos, homologação, deploy e rollback.
 
 Execute os testes com: node --test service-desk/app.test.cjs

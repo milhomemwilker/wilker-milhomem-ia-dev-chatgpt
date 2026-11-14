@@ -1,5 +1,18 @@
 # Detalhamento técnico — Service Desk
 
+## Atualização: proteção do armazenamento e restauração
+
+Foram implementadas duas melhorias em branches próprias:
+
+- `feature/tratamento-armazenamento`: captura falhas de leitura e gravação, valida a estrutura dos chamados, IDs únicos, datas, status, prioridades e histórico. Dados inválidos permanecem intactos no armazenamento; a tela apresenta aviso persistente e bloqueia novas gravações até restauração explícita. Abertura, edição e restauração só alteram a memória após uma gravação bem-sucedida. Falhas preservam os campos para nova tentativa.
+- `feature/confirmacao-restauracao`: o botão **Restaurar base de exemplo** solicita confirmação e avisa sobre a substituição dos chamados. Cancelar preserva memória e armazenamento; confirmar tenta gravar os exemplos sem remover a base anterior primeiro. Se a gravação falhar, os dados anteriores permanecem.
+
+Cada melhoria foi testada e registrada com prefixo `feature:`, integrada na `staging` e revisada por inspeção do diff antes da integração na `main`. A revisão verificou preservação dos dados, ausência de falsa mensagem de sucesso e possibilidade de nova tentativa. Não houve revisão independente por PR.
+
+A suíte passou de seis para onze testes, cobrindo JSON inválido, estrutura incompatível, bloqueio de leitura, falha de escrita nos três fluxos, recuperação da escrita, cancelamento e confirmação da restauração. A verificação de sintaxe também passou. Os testes continuam com DOM e armazenamento simulados; a caixa de confirmação nativa ainda requer validação visual no navegador.
+
+Não há recuperação automática de dados corrompidos nem backup automático. Antes de confirmar uma restauração, preserve uma cópia do valor `serviceDeskTickets` pelas ferramentas do navegador. A restauração substitui dados somente da origem e navegador atuais.
+
 Data: 14/11/2026.
 
 ## Objetivo e contexto
