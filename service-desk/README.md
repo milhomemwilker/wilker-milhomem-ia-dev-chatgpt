@@ -29,3 +29,9 @@ Também é possível abrir diretamente o arquivo `index.html` com dois cliques.
 - `styles.css`: aparência do aplicativo.
 - `app.js`: regras de interação e persistência local.
 - `abrir-service-desk.bat`: atalho para abrir o app no navegador sem subir servidor.
+
+## Versionamento e testes
+
+Consulte [VERSIONAMENTO.md](VERSIONAMENTO.md) para diagnóstico, commits atômicos, homologação, deploy e rollback.
+
+Execute os testes com: node --test service-desk/app.test.cjs
