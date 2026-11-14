@@ -1,5 +1,7 @@
 # Service Desk Acadêmico
 
+O processo completo da atividade — bugs, prompts, commits, melhorias, testes, PRs e pendências — está no [README principal do repositório](../README.md).
+
 Aplicativo web estático feito em HTML, CSS e JavaScript para demonstrar versionamento de código em aula.
 
 ## Como abrir sem servidor
