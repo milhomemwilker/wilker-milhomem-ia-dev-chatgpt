@@ -84,3 +84,13 @@ test('restaurar base recupera dados originais após edição', () => {
   assert.equal(vm.runInContext('tickets[0].events.length', context), 1);
 });
 
+test('abertura rejeita campos contendo apenas espaços', () => {
+  const { context } = app();
+  for (const [selector, value] of Object.entries({
+    '#requester': '   ', '#email': 'ana@example.com', '#category': 'Software',
+    '#priority': 'Alta', '#title': '   ', '#description': '   '
+  })) context.document.querySelector(selector).value = value;
+  context.document.querySelector('#ticketForm').listeners.submit({ preventDefault() {} });
+  assert.equal(vm.runInContext('tickets.length', context), 0);
+});
+

@@ -63,6 +63,12 @@ tabs.forEach((tab) => {
 ticketForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
+  const requiredTextFields = ["#requester", "#title", "#description"];
+  if (requiredTextFields.some((selector) => !document.querySelector(selector).value.trim())) {
+    showToast("Preencha nome, título e descrição com texto válido.");
+    return;
+  }
+
   const formTicket = {
     id: nextId(),
     requester: document.querySelector("#requester").value.trim(),
