@@ -93,4 +93,3 @@ test('abertura rejeita campos contendo apenas espaços', () => {
   context.document.querySelector('#ticketForm').listeners.submit({ preventDefault() {} });
   assert.equal(vm.runInContext('tickets.length', context), 0);
 });
-

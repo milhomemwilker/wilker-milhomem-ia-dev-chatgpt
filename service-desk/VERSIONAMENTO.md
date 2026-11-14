@@ -62,5 +62,3 @@ Use o prefixo `bugfix:` para corrigir bugs e `feature:` para melhorias. Cada bug
 - `4be9eba`: rejeição de campos contendo apenas espaços.
 
 Os testes foram executados antes de cada commit, acumulando seis casos aprovados. A documentação fica em um commit `feature:` separado. A branch atual é `staging`; para a próxima etapa, revise `git log --oneline main..staging` e publique com `git push -u origin staging` quando solicitado. Arquivos pessoais não foram incluídos.
-
-
