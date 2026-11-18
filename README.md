@@ -170,3 +170,11 @@ Este projeto é uma demonstração acadêmica. Não possui backend, autenticaç�
 - [OPERACAO.md](OPERACAO.md): execução, CI, proteção, publicação e rollback.
 - [service-desk/VERSIONAMENTO.md](service-desk/VERSIONAMENTO.md): registro da fase inicial de correções.
 - [service-desk/README.md](service-desk/README.md): instruções rápidas da aplicação.
+
+## Licença
+
+Este repositório adota a **GNU General Public License, versão 3 (GPL-3.0-only)**. Consulte o texto completo em [LICENSE](LICENSE).
+
+Este programa é software livre: você pode redistribuí-lo e/ou modificá-lo sob os termos da GNU GPL versão 3, publicada pela Free Software Foundation. É distribuído sem qualquer garantia, conforme os termos da licença.
+
+As referências ao [repositório original da professora](https://github.com/beatrizSNTech/ia-dev-chatgpt) e os créditos de autoria existentes foram preservados. A inclusão desta licença ocorre neste fork e não modifica o repositório de origem.
